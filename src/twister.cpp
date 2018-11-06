@@ -10,7 +10,7 @@ int toggleDebug(String command);
 void setup();
 void loop();
 #line 7 "/Users/calparticle/Desktop/repos/twister/src/twister.ino"
-int potPin = A0, servoPin = D1, counter = 0;
+int potPin = A0, servoPin = A4, counter = 0;
 bool debug;
 int reading, servoPosition;
 Servo myServo;
@@ -34,8 +34,7 @@ void loop() {
   reading = analogRead(potPin);
   servoPosition = map(reading,0,4095,0,180);
   if (debug) {
-    Serial.printf("Potentiometer: %i, ServoPosition: %i\n",reading, servoPosition);
-    delay(1000);
+    Serial.printf("P: %i, S: %i\n",reading, servoPosition);
   }
   myServo.write(servoPosition);
   delay(30);
