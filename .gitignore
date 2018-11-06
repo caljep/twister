@@ -1,0 +1,6 @@
+#dont include libraries, vsCode configs, or binaries
+
+lib/*
+*.code-workspace
+.vscode/*
+target/*
