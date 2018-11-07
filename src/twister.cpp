@@ -4,15 +4,20 @@
  * Project twister
  * Description:
  * Author:
- * Date:
+ * Dce:
  */
 int toggleDebug(String command);
 void setup();
 void loop();
 #line 7 "/Users/calparticle/Desktop/repos/twister/src/twister.ino"
-int potPin = A0, servoPin = A4, counter = 0;
+int potPin = A7, servoPin = A4, counter = 0;
+int readings [6];
+
 bool debug;
-int reading, servoPosition;
+int newReading;
+int size = sizeof(readings)/sizeof(readings[0]);
+int accum;
+
 Servo myServo;
 
 int toggleDebug(String command) {
@@ -31,11 +36,20 @@ void setup() {
 
 // loop() runs over and over again, as quickly as it can execute.
 void loop() {
-  reading = analogRead(potPin);
-  servoPosition = map(reading,0,4095,0,180);
-  if (debug) {
-    Serial.printf("P: %i, S: %i\n",reading, servoPosition);
+  newReading = map(analogRead(potPin),0,4095,0,180);
+  readings[counter % size] = newReading;
+  counter++;
+
+  // if (debug) {
+  // Serial.printf("size: %d, counter: %d\n",size, counter);
+  // Serial.printf("nr: %d\n",newReading);
+  Serial.printf("%d, %d, %d, %d\n", readings[0], readings[1], readings[2], readings[3]);
+  // }
+  accum = 0;
+  for (int i=0; i<size; i++) {
+    accum += readings[i];
   }
-  myServo.write(servoPosition);
+  Serial.printf("avg: %i\n", accum/size);
+  myServo.write(accum/size);
   delay(30);
 }
