@@ -7,6 +7,7 @@
  * Dce:
  */
 int toggleDebug(String command);
+int getSomeSleep(String command);
 void setInterruptTime();
 void setup();
 void loop();
@@ -32,16 +33,23 @@ int toggleDebug(String command) {
   return ret;
 }
 
+int getSomeSleep(String command) {
+    Serial.printlnf("Went to sleep at %s", Time.timeStr().c_str());
+    System.sleep(D2,CHANGE,60);
+    Serial.printlnf("Actually sleeping at %s", Time.timeStr().c_str());
+    return 1;
+}
+
 void setInterruptTime() {
   interruptTimeRelative = millis() - initialMillis;
 }
 
 // setup() runs once, when the device is first turned on.
 void setup() {
-  // Put initialization like pinMode and begin functions here.
   debug = false;
   myServo.attach(servoPin);
-  Particle.function("toggleDebug",toggleDebug);
+  Particle.function("debug",toggleDebug);
+  Particle.function("sleep",getSomeSleep);
   
   Serial.printlnf("Boot-up time: %s", Time.timeStr().c_str());
   initialTime = Time.now(); 
@@ -50,29 +58,24 @@ void setup() {
   attachInterrupt(D2, setInterruptTime, CHANGE);
 }
 
-// loop() runs over and over again, as quickly as it can execute.
 void loop() {
   newReading = map(analogRead(potPin),0,4095,0,180);
+
+  //To smooth out the noise in the analog reading, I'm taking an avg
   readings[counter % size] = newReading;
   counter++;
-
-  // if (debug) {
-  //   Serial.printf("size: %d, counter: %d\n",size, counter);
-  //   Serial.printf("nr: %d\n",newReading);
-  //   Serial.printf("%d, %d, %d, %d\n", readings[0], readings[1], readings[2], readings[3]);
-  //   Serial.printf("avg: %i\n", accum/size);
-  // }
-  
   accum = 0;
   for (int i=0; i<size; i++) {
     accum += readings[i];
   }
-  //Serial.printlnf("Current time)
+  //Write the avg value of the Pot. to the servo
+  myServo.write(accum/size);
+
+  //Reading the interrupt time on the D2 pin and printing it to serial. 
   if (lastTime != interruptTimeRelative) {
     Serial.printf("Latest Interrupt: %s\n", Time.timeStr(interruptTimeRelative/1000+initialTime).c_str());
     lastTime = interruptTimeRelative;
   }
-  // Serial.printf("current time: %s\n",Time.timeStr(initialTime + interruptTimeRelative/1000));
-  myServo.write(accum/size);
+
   delay(30);
 }

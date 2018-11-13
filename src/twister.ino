@@ -25,6 +25,12 @@ int toggleDebug(String command) {
   return ret;
 }
 
+int getSomeSleep(String command) {
+    Serial.printlnf("Went to sleep at %s", Time.timeStr().c_str());
+    System.sleep(D2,CHANGE,60);
+    return 1;
+}
+
 void setInterruptTime() {
   interruptTimeRelative = millis() - initialMillis;
 }
@@ -33,7 +39,8 @@ void setInterruptTime() {
 void setup() {
   debug = false;
   myServo.attach(servoPin);
-  Particle.function("toggleDebug",toggleDebug);
+  Particle.function("debug",toggleDebug);
+  Particle.function("sleep",getSomeSleep);
   
   Serial.printlnf("Boot-up time: %s", Time.timeStr().c_str());
   initialTime = Time.now(); 
